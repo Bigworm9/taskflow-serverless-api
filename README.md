@@ -11,6 +11,8 @@ This project demonstrates how to re-architect a basic task submission API into a
 
 ## 📌 Architecture
 
+![Serverless Task Architecture](Serverless%20Task%20Architecture.drawio.png)
+
 ```
 Client --> API Gateway --> Lambda (create_task) --> SQS --> Lambda (process_task) --> DynamoDB (TaskTable)
 ```
