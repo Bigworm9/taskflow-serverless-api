@@ -34,21 +34,21 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Initialize Terraform
-      working-directory: ./infra
+      working-directory: ./taskflow-serverless-infra
       run: terraform init
 
     - name: Apply Terraform
-      working-directory: ./infra
+      working-directory: ./taskflow-serverless-infra
       run: terraform apply -auto-approve
 
     - name: Zip & Deploy Lambda - create_task
       run: |
         cd lambda/create_task
-        zip -r function.zip .
-        aws lambda update-function-code --function-name create_task --zip-file fileb://function.zip --region $AWS_REGION
+        zip -r create_task.zip create_task.py
+        aws lambda update-function-code --function-name create_task --zip-file fileb://create_task.zip --region $AWS_REGION
 
     - name: Zip & Deploy Lambda - process_task
       run: |
         cd lambda/process_task
-        zip -r function.zip .
-        aws lambda update-function-code --function-name process_task --zip-file fileb://function.zip --region $AWS_REGION
+        zip -r process_task.zip process_task.py
+        aws lambda update-function-code --function-name process_task --zip-file fileb://process_task.zip --region $AWS_REGION
