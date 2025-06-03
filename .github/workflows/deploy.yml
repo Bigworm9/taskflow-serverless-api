@@ -1,0 +1,54 @@
+name: Terraform Deploy & Lambda Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.6.6
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Initialize Terraform
+      working-directory: ./infra
+      run: terraform init
+
+    - name: Apply Terraform
+      working-directory: ./infra
+      run: terraform apply -auto-approve
+
+    - name: Zip & Deploy Lambda - create_task
+      run: |
+        cd lambda/create_task
+        zip -r function.zip .
+        aws lambda update-function-code --function-name create_task --zip-file fileb://function.zip --region $AWS_REGION
+
+    - name: Zip & Deploy Lambda - process_task
+      run: |
+        cd lambda/process_task
+        zip -r function.zip .
+        aws lambda update-function-code --function-name process_task --zip-file fileb://function.zip --region $AWS_REGION
